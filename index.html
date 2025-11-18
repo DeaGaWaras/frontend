@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SMAN1KE - Sistem absensi & Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+
+  <body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-header text-white sticky top-0 z-50 shadow-md">
+      <nav
+        class="max-w-7xl mx-auto px-4 py-2 sm:py-4 flex items-center justify-between"
+      >
+        <!-- LEFT: LOGO -->
+        <div class="flex items-center gap-2">
+          <div
+            class="w-10 h-10 bg-white/20 rounded flex items-center justify-center font-bold text-lg"
+          >
+            SK
+          </div>
+          <div>
+            <h1 class="text-lg font-bold leading-tight">SMAN1KE</h1>
+            <p class="text-xs text-white/70 hidden sm:block">Sistem Absensi</p>
+          </div>
+        </div>
+
+        <!-- RIGHT: BUTTONS -->
+        <div class="flex items-center gap-1 sm:gap-3">
+          <a
+            href="pages/login.html"
+            class="inline-flex items-center justify-center px-3 py-2 bg-white/20 hover:bg-white/30 rounded transition"
+          >
+            <i class="fas fa-sign-in-alt text-sm"></i>
+            <span class="hidden sm:inline text-sm font-semibold ml-2"
+              >Masuk</span
+            >
+          </a>
+          <a
+            href="pages/register.html"
+            class="inline-flex items-center justify-center px-3 py-2 bg-white/20 hover:bg-white/30 rounded transition"
+          >
+            <i class="fas fa-user-plus text-sm"></i>
+            <span class="hidden sm:inline text-sm font-semibold ml-2"
+              >Daftar</span
+            >
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- MAIN SECTION -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <!-- HERO -->
+      <section class="card-modern p-6 sm:p-10 lg:p-14 text-center mb-12">
+        <h1
+          class="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4"
+        >
+          <span class="text-gradient-pink">Sistem Absensi & Monitoring</span>
+          <br />
+          SMAN 1 Kedunggalar
+        </h1>
+        <p class="text-gray-600 text-sm sm:text-lg max-w-2xl mx-auto mb-8">
+          Platform modern untuk mendukung kehadiran siswi, pengajuan laporan,
+          dan dashboard guru pembina secara real-time.
+        </p>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-3">
+          <a
+            href="pages/login.html"
+            class="btn-primary px-5 py-3 rounded-lg text-sm sm:text-base"
+          >
+            <i class="fas fa-sign-in-alt mr-2"></i>Masuk Sekarang
+          </a>
+          <a
+            href="pages/register.html"
+            class="btn-secondary px-5 py-3 rounded-lg text-sm sm:text-base"
+          >
+            <i class="fas fa-user-plus mr-2"></i>Daftar Akun
+          </a>
+        </div>
+      </section>
+
+      <!-- FITUR -->
+      <section class="mb-12">
+        <h2 class="text-xl sm:text-3xl font-bold text-center mb-8">
+          <span class="text-gradient-pink">Fitur Utama</span>
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Card 1 -->
+          <div class="card-modern p-6 hover:shadow-xl transition rounded-xl">
+            <h3 class="text-xl font-bold text-pink-600 mb-3">
+              📌 Pengajuan Absensi Mudah
+            </h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Siswi dapat mengisi absensi hanya dalam hitungan detik — langsung
+              tersimpan di sistem.
+            </p>
+            <a
+              href="pages/login.html"
+              class="text-pink-600 hover:underline font-semibold text-sm"
+            >
+              Buka Halaman →
+            </a>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="card-modern p-6 hover:shadow-xl transition rounded-xl">
+            <h3 class="text-xl font-bold text-pink-600 mb-3">
+              📊 Dashboard Pembina
+            </h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Guru dapat melihat grafik, laporan kehadiran harian, mingguan, dan
+              per kelas.
+            </p>
+            <a
+              href="pages/login.html"
+              class="text-pink-600 hover:underline font-semibold text-sm"
+            >
+              Lihat Dashboard →
+            </a>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="card-modern p-6 hover:shadow-xl transition rounded-xl">
+            <h3 class="text-xl font-bold text-pink-600 mb-3">
+              🗂 Rekap Otomatis
+            </h3>
+            <p class="text-gray-600 text-sm mb-4">
+              Sistem dapat membuat laporan otomatis dan mendukung ekspor PDF /
+              Excel.
+            </p>
+            <a
+              href="pages/login.html"
+              class="text-pink-600 hover:underline font-semibold text-sm"
+            >
+              Download Laporan →
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t py-6 text-center text-gray-600 text-sm">
+      <p>&copy; 2025 SMAN 1 Kedunggalar — Sistem Absensi & Dashboard</p>
+    </footer>
+  </body>
+</html>

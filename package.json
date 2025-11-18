@@ -1,0 +1,20 @@
+{
+  "name": "frontend-SMAN1KE",
+  "version": "1.0.0",
+  "description": "Frontend  lomba",
+  "scripts": {
+    "start": "http-server . -p 3000 -c-1",
+    "dev": "tailwindcss -i ./assets/css/input.css -o ./assets/css/output.css --watch",
+    "build": "tailwindcss -i ./assets/css/input.css -o ./assets/css/output.css --minify",
+    "build:css": "tailwindcss -i ./assets/css/tailwind.css -o ./assets/css/styles.generated.css --minify || echo \"Tailwind not installed, skipping build\""
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}

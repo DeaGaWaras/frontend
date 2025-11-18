@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Absensi Haid - SMAN1KE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+  </head>
+  <body class="bg-gray-50 min-h-screen p-6">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="space-y-6">
+        <div class="flex justify-between items-start mb-4">
+          <button
+            onclick="window.location.href='./home.html'"
+            class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
+            title="Kembali ke Home"
+          >
+            <i class="fas fa-arrow-left mr-2"></i>
+            <span class="text-sm font-semibold">Kembali</span>
+          </button>
+          <button
+            onclick="window.location.href='./home.html'"
+            class="inline-flex items-center px-4 py-2 text-gray-600 hover:text-gray-900 transition"
+            title="Close"
+          >
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold">Absensi Putri (Haid)</h1>
+            <p class="text-sm text-gray-600">Pantau absensi haid per bulan</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="monthPicker" class="sr-only">Pilih bulan</label>
+            <input id="monthPicker" type="month" class="border rounded p-2" />
+            <button
+              id="refreshBtn"
+              class="bg-pink-500 text-white px-3 py-2 rounded hover:bg-pink-600 transition"
+            >
+              <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+          </div>
+        </div>
+
+        <section id="board" class="card-modern p-6">
+          <div id="summary" class="mb-4 text-sm text-gray-600"></div>
+
+          <div class="overflow-auto">
+            <table
+              id="absensiTable"
+              class="w-full table-auto text-sm border-collapse"
+            >
+              <!-- Rendered by JS -->
+            </table>
+          </div>
+
+          <div class="mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <h3 class="font-semibold">Diduga Bolos</h3>
+              <ul
+                id="suspectList"
+                class="list-disc pl-5 text-sm text-red-600"
+              ></ul>
+            </div>
+            <div>
+              <h3 class="font-semibold">Diduga Jujur</h3>
+              <ul
+                id="honestList"
+                class="list-disc pl-5 text-sm text-green-600"
+              ></ul>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script type="module">
+      import { pageGuard } from "../assets/js/auth-consolidated.js";
+      pageGuard();
+      import "../assets/js/absensi-haid.js";
+    </script>
+  </body>
+</html>

@@ -1,0 +1,282 @@
+/* =========================================================
+   GLOBAL RESET & BASE
+========================================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient(135deg, #fff5f9 0%, #f9f0ff 100%);
+  color: #333;
+  overflow-x: hidden;
+}
+
+.prevent-overflow {
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   BUTTON COMPONENTS
+========================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+  gap: 0.45rem;
+  user-select: none;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #ff7ab8, #ff4fa6);
+  color: white;
+  box-shadow: 0 3px 12px rgba(255, 0, 128, 0.25);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #555;
+}
+
+.btn-red {
+  background: linear-gradient(to right, #ff5a5a, #ff3232);
+  color: white;
+}
+
+.btn-green {
+  background: linear-gradient(to right, #2ecc71, #27ae60);
+  color: white;
+}
+
+.active-scale:active {
+  transform: scale(0.96);
+}
+
+/* =========================================================
+   INPUT & FORM COMPONENTS
+========================================================= */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+.input-modern {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.6rem;
+  background: #f7f7f7;
+  transition: 0.25s ease;
+  border: none;
+  outline: none;
+  min-height: 44px;
+}
+
+input:focus,
+.input-modern:focus {
+  background: white;
+  box-shadow: 0 0 0 2px #f9c0e1;
+}
+
+/* icon hover mini (login form improvement) */
+.icon-hover {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.icon-hover:hover {
+  transform: scale(0.85);
+  opacity: 0.8;
+}
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+/* ============================
+   NAV TAB – LEBIH MINIMALIS & IMUT
+============================ */
+.nav-tab {
+  position: relative;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+  border-radius: 10px;
+  color: #555;
+  font-weight: 500;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
+}
+
+/* Efek shrink + background kecil */
+.nav-shrink {
+  transition: all 0.2s ease;
+  border-radius: 10px;
+}
+
+.nav-shrink:hover {
+  background: rgba(255, 182, 193, 0.12);
+  transform: scale(0.95); /* lebih kecil dari sebelumnya */
+  color: #d61f69;
+}
+
+/* Active */
+.nav-tab.active {
+  background: rgba(255, 182, 193, 0.25);
+  color: #d61f69;
+  font-weight: 600;
+}
+
+/* Icon mengecil */
+.nav-tab i {
+  transition: transform 0.2s ease;
+}
+
+.nav-tab:hover i {
+  transform: scale(0.88); /* diperkecil lagi */
+}
+
+
+/* =========================================================
+   CARDS & CONTAINERS
+========================================================= */
+
+.card-modern {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+}
+
+.card-p {
+  padding: 1rem;
+}
+
+.card-lg {
+  padding: 1.8rem;
+}
+
+.gradient-header {
+  background: linear-gradient(to right, #ff7ab8, #ff4fa6);
+}
+
+/* Hover utility */
+.hover-shadow {
+  transition: 0.25s ease;
+}
+.hover-shadow:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================================================
+   TEXT & TYPOGRAPHY
+========================================================= */
+
+.text-gradient-pink {
+  background: linear-gradient(to right, #ff7ab8, #ff4fa6);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.center {
+  text-align: center;
+}
+
+/* =========================================================
+   MODALS
+========================================================= */
+
+.modal {
+  display: none;
+}
+
+.modal.open {
+  display: block;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .modal-backdrop {
+    align-items: center;
+  }
+}
+
+.modal-box {
+  background: white;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+}
+
+.modal-content {
+  padding: 1.5rem;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.slide-in-from-bottom {
+  animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* =========================================================
+   RESPONSIVE UTILITIES
+========================================================= */
+
+.hidden-mobile {
+  display: none;
+}
+@media (min-width: 640px) {
+  .hidden-mobile {
+    display: block;
+  }
+}
+
+.hidden-tablet-up {
+  display: block;
+}
+@media (min-width: 768px) {
+  .hidden-tablet-up {
+    display: none;
+  }
+}
+
