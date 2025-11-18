@@ -2,7 +2,7 @@
 // api-consolidated.js — Unified API Layer
 // ======================================================
 
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://deagawaras.github.io/backend/api";
 
 /**
  * Wrapper universal untuk request API.
