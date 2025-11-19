@@ -281,39 +281,37 @@
 }
 
       /* ==================== PROFILE ==================== */
-     async function showProfile() {
-  const container = document.getElementById("content");
+    async function loadSiswiStats(userId) {
+  try {
+    const res = await fetch(`${API_BASE}/izin/user/${userId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
 
+    const data = await res.json();
+    document.getElementById("statTotal").textContent = data.length || 0;
+
+  } catch (err) {
+    console.error("Stat error:", err);
+  }
+}
+
+
+
+    async function showProfile() {
+  const container = document.getElementById("content");
   container.innerHTML = `
     <div class="text-center py-12">
-      <i class="fas fa-spinner animate-spin text-4xl text-pink-500"></i>
+      <i class="fas fa-spinner animate-spin text-4xl"></i>
     </div>`;
 
   try {
-    // Ambil profil
     const res = await getProfile();
-    const profile = res.data || res;
 
-    // Ambil semua absensi untuk statistik
-    const listRes = await getabsensiList();
-    const list = Array.isArray(listRes?.data) ? listRes.data : listRes || [];
+    // Data profil BUKAN res.data, tetapi res.user
+    const profile = res.user;
 
-    // ======== HITUNG STATISTIK =========
-    const total = list.length;
-    const approved = list.filter(a => a.status === "approved").length;
-    const pending = list.filter(a => a.status === "pending").length;
-    const rejected = list.filter(a => a.status === "rejected").length;
+    const isSiswi = profile.role === "siswi";
 
-    // Hitung total hari izin
-    let totalHari = 0;
-    list.forEach(a => {
-      const start = new Date(a.tanggalMulai);
-      const end = new Date(a.tanggalSelesai || a.tanggalMulai);
-      const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-      totalHari += diff;
-    });
-
-    // =============== RENDER UI ===============
     const html = `
       <div class="space-y-6">
         <h2 class="text-3xl font-bold">👤 Profil Saya</h2>
@@ -323,63 +321,47 @@
           <!-- Informasi Dasar -->
           <div class="card-modern p-6 md:col-span-2">
             <h3 class="text-xl font-bold mb-4">Informasi Dasar</h3>
+
             <div class="space-y-4">
               <div>
                 <label class="block text-sm text-gray-600">Nama</label>
                 <p class="text-lg font-semibold">${profile.name || "-"}</p>
               </div>
+
               <div>
                 <label class="block text-sm text-gray-600">Email</label>
                 <p class="text-lg font-semibold">${profile.email || "-"}</p>
               </div>
-              <div>
-                <label class="block text-sm text-gray-600">Kelas</label>
-                <p class="text-lg font-semibold">${profile.kelas || "-"}</p>
-              </div>
+
               <div>
                 <label class="block text-sm text-gray-600">Role</label>
-                <p class="text-lg font-semibold">👩‍🎓 Siswi</p>
+                <p class="text-lg font-semibold capitalize">${profile.role}</p>
               </div>
             </div>
           </div>
 
-          <!-- Statistik -->
+          <!-- Statistik (Hanya untuk SISWI) -->
+          ${isSiswi ? `
           <div class="card-modern p-6">
-            <h3 class="text-xl font-bold mb-4">Statistik Absensi</h3>
-            <div class="space-y-4 text-center">
-
+            <h3 class="text-xl font-bold mb-4">Statistik</h3>
+            <div class="space-y-3 text-center">
               <div>
-                <p class="text-gray-600 text-sm">Total Absensi</p>
-                <p class="text-3xl font-bold text-pink-600">${total}</p>
+                <p class="text-gray-600 text-sm">Total pengajuan izin</p>
+                <p class="text-3xl font-bold text-pink-600" id="statTotal">0</p>
               </div>
-
-              <div>
-                <p class="text-gray-600 text-sm">Disetujui</p>
-                <p class="text-2xl font-bold text-green-600">${approved}</p>
-              </div>
-
-              <div>
-                <p class="text-gray-600 text-sm">Pending</p>
-                <p class="text-xl font-bold text-yellow-600">${pending}</p>
-              </div>
-
-              <div>
-                <p class="text-gray-600 text-sm">Ditolak</p>
-                <p class="text-xl font-bold text-red-600">${rejected}</p>
-              </div>
-
-              <div class="pt-2">
-                <p class="text-gray-600 text-sm">Total Hari Izin</p>
-                <p class="text-2xl font-bold text-purple-600">${totalHari}</p>
-              </div>
-
             </div>
           </div>
-
+          ` : ""}
         </div>
-      </div>`;
+      </div>
+    `;
 
     container.innerHTML = html;
+
+    // Jika siswi → ambil statistik
+    if (isSiswi) {
+      loadSiswiStats(profile.id);
+    }
 
   } catch (err) {
     console.error("Profile error:", err);
@@ -390,6 +372,7 @@
       </div>`;
   }
 }
+
 
       /* ==================== DELETE absensi ==================== */
       window.deleteabsensi = async (id) => {

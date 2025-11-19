@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>dzuhurKU- SMAN1KE</title>
+    <title>dzuhurKU - SMAN1KE</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -12,76 +13,90 @@
     <link rel="stylesheet" href="../assets/css/styles.css" />
     <link rel="icon" href="../assets/images/favicon.ico">
   </head>
-  <body class="bg-gray-50 min-h-screen p-6">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="space-y-6">
-        <div class="flex justify-between items-start mb-4">
-          <button
-            onclick="window.location.href='./home.html'"
-            class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition"
-            title="Kembali ke Home"
-          >
-            <i class="fas fa-arrow-left mr-2"></i>
-            <span class="text-sm font-semibold">Kembali</span>
-          </button>
-          <button
-            onclick="window.location.href='./home.html'"
-            class="inline-flex items-center px-4 py-2 text-gray-600 hover:text-gray-900 transition"
-            title="Close"
-          >
-            <i class="fas fa-times text-lg"></i>
-          </button>
+
+  <body class="bg-gray-100 min-h-screen p-6">
+    <div class="max-w-6xl mx-auto space-y-8">
+
+      <!-- HEADER NAV -->
+      <div class="flex items-center justify-between">
+        <button
+          onclick="window.location.href='./home.html'"
+          class="flex items-center gap-2 px-4 py-2 bg-white shadow rounded-lg hover:bg-gray-100 transition"
+        >
+          <i class="fas fa-arrow-left"></i>
+          <span>Kembali</span>
+        </button>
+
+        <button
+          onclick="window.location.href='./home.html'"
+          class="text-gray-500 hover:text-gray-800 bg-white px-4 py-2 shadow rounded-lg transition"
+        >
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <!-- PAGE TITLE -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold">Absensi Putri</h1>
+          <p class="text-gray-600">Pantau dan kelola absensi haid per bulan</p>
         </div>
 
-        <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-3xl font-bold">Absensi Putri</h1>
-            <p class="text-sm text-gray-600">Pantau absensi haid per bulan</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <label for="monthPicker" class="sr-only">Pilih bulan</label>
-            <input id="monthPicker" type="month" class="border rounded p-2" />
-            <button
-              id="refreshBtn"
-              class="bg-pink-500 text-white px-3 py-2 rounded hover:bg-pink-600 transition"
-            >
-              <i class="fas fa-sync-alt mr-2"></i>Refresh
-            </button>
-          </div>
+        <div class="flex items-center gap-3">
+          <input
+            id="monthPicker"
+            type="month"
+            class="border p-2 rounded-lg shadow-sm focus:ring-pink-400 focus:border-pink-400"
+          />
+
+          <button
+            id="refreshBtn"
+            class="bg-pink-500 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-600 transition flex items-center gap-2"
+          >
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
         </div>
+      </div>
 
-        <section id="board" class="card-modern p-6">
-          <div id="summary" class="mb-4 text-sm text-gray-600"></div>
+      <!-- MAIN BOARD -->
+      <section id="board" class="bg-white p-6 rounded-xl shadow-md space-y-4">
+        
+        <!-- SUMMARY -->
+        <div id="summary" class="text-gray-700 text-sm"></div>
 
-          <div class="overflow-auto">
+        <!-- TABLE WRAPPER -->
+        <div class="rounded-lg overflow-hidden border bg-white">
+          <div class="overflow-auto max-h-[520px]">
             <table
               id="absensiTable"
-              class="w-full table-auto text-sm border-collapse"
-            >
-              <!-- Rendered by JS -->
-            </table>
+              class="w-full text-sm text-left border-collapse"
+            ></table>
+          </div>
+        </div>
+
+        <!-- LIST SECTION -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+
+          <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+            <h3 class="font-semibold text-red-700 mb-2 flex items-center gap-2">
+              <i class="fas fa-exclamation-circle"></i> Abnormal
+            </h3>
+            <ul id="suspectList" class="list-disc pl-5 text-sm text-red-700"></ul>
           </div>
 
-          <div class="mt-4 grid grid-cols-2 gap-4">
-            <div>
-              <h3 class="font-semibold">Abnormal</h3>
-              <ul
-                id="suspectList"
-                class="list-disc pl-5 text-sm text-red-600"
-              ></ul>
-            </div>
-            <div>
-              <h3 class="font-semibold">Normal</h3>
-              <ul
-                id="honestList"
-                class="list-disc pl-5 text-sm text-green-600"
-              ></ul>
-            </div>
+          <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+            <h3 class="font-semibold text-green-700 mb-2 flex items-center gap-2">
+              <i class="fas fa-check-circle"></i> Normal
+            </h3>
+            <ul id="honestList" class="list-disc pl-5 text-sm text-green-700"></ul>
           </div>
-        </section>
-      </div>
+
+        </div>
+
+      </section>
     </div>
 
+    <!-- JS -->
     <script type="module">
       import { pageGuard } from "../assets/js/auth-consolidated.js";
       pageGuard();
