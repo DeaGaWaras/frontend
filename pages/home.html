@@ -12,7 +12,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="../assets/css/styles.css" />
-    <link rel="icon" href="../assets/images/favicon.ico">
+    <link rel="icon" href="../assets/images/favicon.ico" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
@@ -27,14 +27,13 @@
         class="max-w-7xl mx-auto px-4 py-3 sm:py-5 flex justify-between items-center"
       >
         <div class="flex items-center gap-2 sm:gap-3">
-        <div class="w-8 sm:w-10 h-8 sm:h-10 rounded-lg overflow-hidden flex items-center justify-center bg-white/20">
-  <img 
-    src="../assets/images/logo.png" 
-    alt="Logo"
-    class="w-full h-full object-cover"
-    onerror="this.src='https://via.placeholder.com/80x80?text=Img';"
-  />
-</div>
+          <div class="w-8 sm:w-10 h-8 sm:h-10 rounded-full overflow-hidden">
+            <img
+              src="../assets/images/logo.png"
+              alt="Logo"
+              class="w-full h-full object-cover"
+            />
+          </div>
 
           <div>
             <h1 class="text-lg sm:text-xl font-bold">dzuhurKU</h1>
@@ -60,39 +59,39 @@
       </div>
     </header>
 
-  <!-- Navigation Tabs -->
-<!-- Navigation Tabs (Improved Version) -->
-<nav class="backdrop-blur-xl bg-white/85 border-b border-pink-100 sticky top-[3.5rem] sm:top-20 z-40 shadow-md">
-  <div class="max-w-7xl mx-auto px-3 sm:px-6 flex gap-3 sm:gap-8 overflow-x-auto no-scrollbar h-16 sm:h-20 items-center">
-
-    <button
-      class="nav-tab nav-modern active flex items-center gap-2 text-base sm:text-lg font-semibold py-3 px-4 rounded-xl transition-all"
-      data-tab="dashboard"
+    <!-- Navigation Tabs -->
+    <!-- Navigation Tabs (Improved Version) -->
+    <nav
+      class="backdrop-blur-xl bg-white/85 border-b border-pink-100 sticky top-[3.5rem] sm:top-20 z-40 shadow-md"
     >
-      <i class="fas fa-chart-bar text-pink-500 text-lg"></i>
-      <span class="hidden sm:inline">Dashboard</span>
-    </button>
+      <div
+        class="max-w-7xl mx-auto px-3 sm:px-6 flex gap-3 sm:gap-8 overflow-x-auto no-scrollbar h-16 sm:h-20 items-center"
+      >
+        <button
+          class="nav-tab nav-modern active flex items-center gap-2 text-base sm:text-lg font-semibold py-3 px-4 rounded-xl transition-all"
+          data-tab="dashboard"
+        >
+          <i class="fas fa-chart-bar text-pink-500 text-lg"></i>
+          <span class="hidden sm:inline">Dashboard</span>
+        </button>
 
-    <button
-      class="nav-tab nav-modern flex items-center gap-2 text-base sm:text-lg font-semibold py-3 px-4 rounded-xl transition-all"
-      data-tab="absensi"
-    >
-      <i class="fas fa-clipboard-list text-purple-500 text-lg"></i>
-      <span class="hidden sm:inline">Absensi</span>
-    </button>
+        <button
+          class="nav-tab nav-modern flex items-center gap-2 text-base sm:text-lg font-semibold py-3 px-4 rounded-xl transition-all"
+          data-tab="absensi"
+        >
+          <i class="fas fa-clipboard-list text-purple-500 text-lg"></i>
+          <span class="hidden sm:inline">Absensi</span>
+        </button>
 
-    <button
-      class="nav-tab nav-modern flex items-center gap-2 text-base sm:text-lg font-semibold py-3 px-4 rounded-xl transition-all"
-      data-tab="profile"
-    >
-      <i class="fas fa-user text-blue-500 text-lg"></i>
-      <span class="hidden sm:inline">Profil</span>
-    </button>
-
-  </div>
-</nav>
-
-
+        <button
+          class="nav-tab nav-modern flex items-center gap-2 text-base sm:text-lg font-semibold py-3 px-4 rounded-xl transition-all"
+          data-tab="profile"
+        >
+          <i class="fas fa-user text-blue-500 text-lg"></i>
+          <span class="hidden sm:inline">Profil</span>
+        </button>
+      </div>
+    </nav>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-8">
@@ -230,39 +229,37 @@
         document.getElementById("form-absensi").reset();
       };
 
-
       async function loadSiswiStats(userId) {
-  try {
-    const res = await fetch(`${API_BASE}/izin/user/${userId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    });
+        try {
+          const res = await fetch(`${API_BASE}/izin/user/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
 
-    const data = await res.json();
-    document.getElementById("statTotal").textContent = data.length || 0;
+          const data = await res.json();
+          document.getElementById("statTotal").textContent = data.length || 0;
+        } catch (err) {
+          console.error("Stat error:", err);
+        }
+      }
 
-  } catch (err) {
-    console.error("Stat error:", err);
-  }
-}
-
-
-
-    async function showProfile() {
-  const container = document.getElementById("content");
-  container.innerHTML = `
+      async function showProfile() {
+        const container = document.getElementById("content");
+        container.innerHTML = `
     <div class="text-center py-12">
       <i class="fas fa-spinner animate-spin text-4xl"></i>
     </div>`;
 
-  try {
-    const res = await getProfile();
+        try {
+          const res = await getProfile();
 
-    // Data profil BUKAN res.data, tetapi res.user
-    const profile = res.user;
+          // Data profil BUKAN res.data, tetapi res.user
+          const profile = res.user;
 
-    const isSiswi = profile.role === "siswi";
+          const isSiswi = profile.role === "siswi";
 
-    const html = `
+          const html = `
       <div class="space-y-6">
         <h2 class="text-3xl font-bold">👤 Profil Saya</h2>
 
@@ -291,7 +288,9 @@
           </div>
 
           <!-- Statistik (Hanya untuk SISWI) -->
-          ${isSiswi ? `
+          ${
+            isSiswi
+              ? `
           <div class="card-modern p-6">
             <h3 class="text-xl font-bold mb-4">Statistik</h3>
             <div class="space-y-3 text-center">
@@ -301,29 +300,28 @@
               </div>
             </div>
           </div>
-          ` : ""}
+          `
+              : ""
+          }
         </div>
       </div>
     `;
 
-    container.innerHTML = html;
+          container.innerHTML = html;
 
-    // Jika siswi → ambil statistik
-    if (isSiswi) {
-      loadSiswiStats(profile.id);
-    }
-
-  } catch (err) {
-    console.error("Profile error:", err);
-    container.innerHTML = `
+          // Jika siswi → ambil statistik
+          if (isSiswi) {
+            loadSiswiStats(profile.id);
+          }
+        } catch (err) {
+          console.error("Profile error:", err);
+          container.innerHTML = `
       <div class="card-modern p-8 text-center">
         <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
         <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
       </div>`;
-  }
-}
-
-
+        }
+      }
 
       /* ==================== DASHBOARD ==================== */
       async function showDashboard() {
@@ -386,7 +384,6 @@
 
    `;
 
-
           // Load initial daily report
           setTimeout(() => {
             window.loadDailyReport();
@@ -402,117 +399,133 @@
       }
 
       /* ==================== ABSENSI ==================== */
-async function showabsensi() {
-  const role = getUserRole();
-  const container = document.getElementById("content");
+      async function showabsensi() {
+        const role = getUserRole();
+        const container = document.getElementById("content");
 
-  container.innerHTML = `
+        container.innerHTML = `
     <div class="flex justify-center py-12">
       <i class="fas fa-spinner animate-spin text-4xl text-pink-400"></i>
     </div>
   `;
 
-  try {
-    let list = [];
+        try {
+          let list = [];
 
-    if (role === "guru") {
-      const now = new Date();
-      const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+          if (role === "guru") {
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${String(
+              now.getMonth() + 1
+            ).padStart(2, "0")}`;
 
-      const resH = await getHaidAggregate(monthStr);
-      list = (resH && (resH.data || resH)) || [];
-    } else {
-      const res = await getabsensiList();
-      list = res.data || res || [];
-    }
+            const resH = await getHaidAggregate(monthStr);
+            list = (resH && (resH.data || resH)) || [];
+          } else {
+            const res = await getabsensiList();
+            list = res.data || res || [];
+          }
 
-    let html = `
+          let html = `
       <div class="space-y-6">
         
         <!-- HEADER TITLE -->
         <div class="flex justify-between items-center flex-wrap gap-3">
           <div>
             <h2 class="text-3xl font-bold leading-tight">
-              ${role === "guru" ? "📋 Data Absensi Siswi" : "📋 Riwayat Absensi Saya"}
+              ${
+                role === "guru"
+                  ? "📋 Data Absensi Siswi"
+                  : "📋 Riwayat Absensi Saya"
+              }
             </h2>
             <p class="text-gray-600 mt-1">Kelola dan pantau absensi</p>
           </div>
     `;
 
-    if (role === "siswi") {
-      html += `
+          if (role === "siswi") {
+            html += `
         <button onclick="openabsensiModal()" class="btn-primary px-6 py-3 rounded-lg whitespace-nowrap">
           <i class="fas fa-plus mr-2"></i>Tambah Absensi
         </button>
       `;
-    }
+          }
 
-    if (role === "guru") {
-      html += `
+          if (role === "guru") {
+            html += `
         <button onclick="window.location.href='./absensi-haid.html'"
           class="px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 whitespace-nowrap">
           <i class="fas fa-heart mr-2"></i>Absensi Haid
         </button>
       `;
-    }
+          }
 
-    html += `</div>`;
+          html += `</div>`;
 
-    /* ---------- JIKA DATA KOSONG ---------- */
-    if (!list.length) {
-      html += `
+          /* ---------- JIKA DATA KOSONG ---------- */
+          if (!list.length) {
+            html += `
         <div class="card-modern p-12 text-center">
           <i class="fas fa-inbox text-5xl text-gray-300"></i>
           <p class="mt-4 text-gray-600">Belum ada data absensi</p>
         </div>
       `;
-    } else {
-      html += `<div class="space-y-3">`;
+          } else {
+            html += `<div class="space-y-3">`;
 
-      /* ---------- AGREGASI GURU ---------- */
-      if (role === "guru" && list[0].days !== undefined) {
-        const analyzeDaysLocal = (dayArr) => {
-          const days = Array.from(new Set((dayArr || []).map(Number))).sort((a, b) => a - b);
-          if (!days.length) return { honest: false, suspect: false, total: 0, maxSeq: 0 };
+            /* ---------- AGREGASI GURU ---------- */
+            if (role === "guru" && list[0].days !== undefined) {
+              const analyzeDaysLocal = (dayArr) => {
+                const days = Array.from(
+                  new Set((dayArr || []).map(Number))
+                ).sort((a, b) => a - b);
+                if (!days.length)
+                  return { honest: false, suspect: false, total: 0, maxSeq: 0 };
 
-          let maxSeq = 1, cur = 1;
-          for (let i = 1; i < days.length; i++) {
-            if (days[i] === days[i - 1] + 1) {
-              cur++;
-              if (cur > maxSeq) maxSeq = cur;
-            } else cur = 1;
-          }
+                let maxSeq = 1,
+                  cur = 1;
+                for (let i = 1; i < days.length; i++) {
+                  if (days[i] === days[i - 1] + 1) {
+                    cur++;
+                    if (cur > maxSeq) maxSeq = cur;
+                  } else cur = 1;
+                }
 
-          const hasSmallGap = days.some((d, idx) => idx > 0 && d - days[idx - 1] - 1 >= 1 && d - days[idx - 1] - 1 <= 2);
+                const hasSmallGap = days.some(
+                  (d, idx) =>
+                    idx > 0 &&
+                    d - days[idx - 1] - 1 >= 1 &&
+                    d - days[idx - 1] - 1 <= 2
+                );
 
-          return {
-            honest: maxSeq >= 4,
-            suspect: hasSmallGap && days.length >= 2,
-            total: days.length,
-            maxSeq
-          };
-        };
+                return {
+                  honest: maxSeq >= 4,
+                  suspect: hasSmallGap && days.length >= 2,
+                  total: days.length,
+                  maxSeq,
+                };
+              };
 
-        html += list.map((i) => {
-          const name = i.name || i.nama || "-";
-          const kelas = i.classId || i.kelas || "-";
-          const days = i.days || [];
+              html += list
+                .map((i) => {
+                  const name = i.name || i.nama || "-";
+                  const kelas = i.classId || i.kelas || "-";
+                  const days = i.days || [];
 
-          const an = analyzeDaysLocal(days);
+                  const an = analyzeDaysLocal(days);
 
-          const statusLabel = an.honest
-            ? "NORMAL"
-            : an.suspect
-            ? "ABNORMAL"
-            : "RECORDED";
+                  const statusLabel = an.honest
+                    ? "NORMAL"
+                    : an.suspect
+                    ? "ABNORMAL"
+                    : "RECORDED";
 
-          const badgeClass = an.honest
-            ? "border-green-500"
-            : an.suspect
-            ? "border-red-500"
-            : "border-yellow-500";
+                  const badgeClass = an.honest
+                    ? "border-green-500"
+                    : an.suspect
+                    ? "border-red-500"
+                    : "border-yellow-500";
 
-          return `
+                  return `
             <div class="card-modern p-5 border-l-4 ${badgeClass}">
               <div class="flex justify-between items-start mb-3">
                 <div>
@@ -521,25 +534,37 @@ async function showabsensi() {
                 </div>
                 <span class="badge-status">${statusLabel}</span>
               </div>
-              <p class="mt-2"><i class="fas fa-calendar mr-2 text-pink-400"></i>Hari: ${days.join(", ") || "-"}</p>
-              <p class="mt-1"><i class="fas fa-file-alt mr-2 text-purple-400"></i>Total X: ${an.total}</p>
+              <p class="mt-2"><i class="fas fa-calendar mr-2 text-pink-400"></i>Hari: ${
+                days.join(", ") || "-"
+              }</p>
+              <p class="mt-1"><i class="fas fa-file-alt mr-2 text-purple-400"></i>Total X: ${
+                an.total
+              }</p>
             </div>
           `;
-        }).join("");
-      }
+                })
+                .join("");
+            } else {
 
-      /* ---------- SISWI ATAU DATA BIASA ---------- */
-      else {
-        html += list.map((i) => `
+            /* ---------- SISWI ATAU DATA BIASA ---------- */
+              html += list
+                .map(
+                  (i) => `
           <div class="card-modern p-5 border-l-4 ${
-            i.status === "approved" ? "border-green-500"
-              : i.status === "rejected" ? "border-red-500"
+            i.status === "approved"
+              ? "border-green-500"
+              : i.status === "rejected"
+              ? "border-red-500"
               : "border-yellow-500"
           }">
             <div class="flex justify-between items-start mb-3">
               <div>
-                <h4 class="font-bold text-lg">${i.nama || i.siswi?.name || "-"}</h4>
-                <p class="text-xs text-gray-600 mt-1">📚 ${i.kelas || i.siswi?.kelas || "-"}</p>
+                <h4 class="font-bold text-lg">${
+                  i.nama || i.siswi?.name || "-"
+                }</h4>
+                <p class="text-xs text-gray-600 mt-1">📚 ${
+                  i.kelas || i.siswi?.kelas || "-"
+                }</p>
               </div>
               <span class="badge-status badge-${i.status}">
                 ${i.status.toUpperCase()}
@@ -550,28 +575,31 @@ async function showabsensi() {
               ${formatDate(i.tanggalMulai)}
               ${i.tanggalSelesai ? " s/d " + formatDate(i.tanggalSelesai) : ""}
             </p>
-            <p class="mt-1"><i class="fas fa-file-alt mr-2 text-purple-400"></i>${i.alasan || "-"}</p>
+            <p class="mt-1"><i class="fas fa-file-alt mr-2 text-purple-400"></i>${
+              i.alasan || "-"
+            }</p>
           </div>
-        `).join("");
-      }
+        `
+                )
+                .join("");
+            }
 
-      html += `</div>`;
-    }
+            html += `</div>`;
+          }
 
-    html += `</div>`;
+          html += `</div>`;
 
-    container.innerHTML = html;
-  } catch (err) {
-    container.innerHTML = `
+          container.innerHTML = html;
+        } catch (err) {
+          container.innerHTML = `
       <div class="card-modern p-8 text-center">
         <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
         <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
         <p class="text-gray-600 mt-2">${err.message}</p>
       </div>
     `;
-  }
-}
-
+        }
+      }
 
       /* ==================== REPORT FUNCTIONS ==================== */
       window.loadDailyReport = async () => {
