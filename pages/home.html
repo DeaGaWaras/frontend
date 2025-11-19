@@ -234,62 +234,116 @@
       };
 
 
-       async function showProfile() {
-        const container = document.getElementById("content");
-        container.innerHTML = `<div class="text-center py-12"><i class="fas fa-spinner animate-spin text-4xl"></i></div>`;
+     async function showProfile() {
+  const container = document.getElementById("content");
+  container.innerHTML = `
+    <div class="text-center py-12">
+      <i class="fas fa-spinner animate-spin text-4xl text-pink-500"></i>
+    </div>
+  `;
 
-        try {
-          const res = await getProfile();
-          const profile = res.data || res;
+  try {
+    const res = await getProfile();
+    const profile = res.data || res;
 
-          const html = `
-        <div class="space-y-6">
-          <h2 class="text-3xl font-bold">👤 Profil Saya</h2>
+    const role = profile.role; // "guru" atau "siswa"
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="card-modern p-6 md:col-span-2">
-              <h3 class="text-xl font-bold mb-4">Informasi Dasar</h3>
-              <div class="space-y-4">
-                <div>
-                  <label class="block text-sm text-gray-600">Nama</label>
-                  <p class="text-lg font-semibold">${profile.name || "-"}</p>
-                </div>
-                <div>
-                  <label class="block text-sm text-gray-600">Email</label>
-                  <p class="text-lg font-semibold">${profile.email || "-"}</p>
-                </div>
-                <div>
-                  <label class="block text-sm text-gray-600">Kelas</label>
-                  <p class="text-lg font-semibold">${profile.kelas || "-"}</p>
-                </div>
-                <div>
-                  <label class="block text-sm text-gray-600">Role</label>
-                  <p class="text-lg font-semibold">Guru</p>
-                </div>
-              </div>
+    // Default statistik untuk guru
+    let statistikHTML = `
+      <div class="card-modern p-6">
+        <h3 class="text-xl font-bold mb-4">Statistik</h3>
+        <div class="text-center py-6 text-gray-500">
+          <i class="fas fa-info-circle mr-2"></i>
+          Tidak ada statistik untuk Guru Pembina
+        </div>
+      </div>
+    `;
+
+    // Jika siswi → tampilkan statistik Absensi Haid
+    if (role === "siswa") {
+      const stats = await getHaidSummary(); // pastikan endpoint ini sudah ada
+
+      statistikHTML = `
+        <div class="card-modern p-6">
+          <h3 class="text-xl font-bold mb-4">Statistik Haid</h3>
+
+          <div class="space-y-4 text-center">
+            <div>
+              <p class="text-gray-600 text-sm">Total Pengajuan</p>
+              <p class="text-3xl font-bold text-pink-600">${stats.total || 0}</p>
             </div>
 
-            <div class="card-modern p-6">
-              <h3 class="text-xl font-bold mb-4">Statistik</h3>
-              <div class="space-y-3 text-center">
-                <div>
-                  <p class="text-gray-600 text-sm">Total absensi</p>
-                  <p class="text-3xl font-bold text-pink-600">0</p>
-                </div>
+            <div>
+              <p class="text-gray-600 text-sm">Total Hari</p>
+              <p class="text-3xl font-bold text-pink-600">${stats.total_hari || 0}</p>
+            </div>
+
+            <div>
+              <p class="text-gray-600 text-sm">Rata-rata Durasi</p>
+              <p class="text-3xl font-bold text-pink-600">${stats.rata_durasi || 0} hari</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // TEMPLATE UTAMA PROFIL
+    container.innerHTML = `
+      <div class="space-y-6">
+
+        <h2 class="text-3xl font-bold">👤 Profil Saya</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          <!-- Informasi Dasar -->
+          <div class="card-modern p-6 md:col-span-2">
+            <h3 class="text-xl font-bold mb-4">Informasi Dasar</h3>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm text-gray-600">Nama</label>
+                <p class="text-lg font-semibold">${profile.name || "-"}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm text-gray-600">Email</label>
+                <p class="text-lg font-semibold">${profile.email || "-"}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm text-gray-600">Kelas</label>
+                <p class="text-lg font-semibold">${profile.kelas || "-"}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm text-gray-600">Role</label>
+                <p class="text-lg font-semibold">
+                  ${role === "guru" ? "Guru Pembina" : "Siswi"}
+                </p>
               </div>
             </div>
           </div>
-        </div>`;
 
-          container.innerHTML = html;
-        } catch (err) {
-          console.error("Profile error:", err);
-          container.innerHTML = `<div class="card-modern p-8 text-center">
-            <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
-            <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
-          </div>`;
-        }
-      }
+          <!-- Statistik -->
+          ${statistikHTML}
+
+        </div>
+
+      </div>
+    `;
+
+  } catch (err) {
+    console.error("Profile error:", err);
+
+    container.innerHTML = `
+      <div class="card-modern p-8 text-center">
+        <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
+        <h3 class="text-2xl font-bold">Gagal Memuat Profil</h3>
+      </div>
+    `;
+  }
+}
+
 
       /* ==================== DASHBOARD ==================== */
       async function showDashboard() {
