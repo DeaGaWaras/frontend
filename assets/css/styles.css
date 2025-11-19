@@ -280,3 +280,18 @@ input:focus,
   }
 }
 
+
+.favicon-maker {
+  width: 256px;
+  height: 256px;
+  border-radius: 50%;
+  border: 20px solid #f63bf0;
+  background: white;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.favicon-maker img {
+  width: 70%;
+}

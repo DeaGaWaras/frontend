@@ -292,16 +292,8 @@
               </div>
             </div>
 
-            <!-- Report Tabs -->
-            <div class="card-modern p-6">
-              <div class="flex gap-2 mb-6 flex-wrap">
-                <button onclick="window.loadDailyReport()" class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600">📅 Laporan Harian</button>
-                <button onclick="window.loadWeeklyReport()" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600">📈 Laporan Mingguan</button>
-                <button onclick="window.loadPerClassReport()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">👥 Per Kelas</button>
-              </div>
-              <div id="report-content"></div>
-            </div>
-          </div>`;
+/           `;
+
 
           // Load initial daily report
           setTimeout(() => {
@@ -417,10 +409,10 @@ async function showabsensi() {
           const an = analyzeDaysLocal(days);
 
           const statusLabel = an.honest
-            ? "JUJUR"
+            ? "NORMAL"
             : an.suspect
-            ? "DIDUGA BOLOS"
-            : "TERCATAT";
+            ? "ABNORMAL"
+            : "RECORDED";
 
           const badgeClass = an.honest
             ? "border-green-500"
