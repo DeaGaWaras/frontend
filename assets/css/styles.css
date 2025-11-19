@@ -105,6 +105,123 @@ input:focus,
    NAVIGATION
 ========================================================= */
 
+
+/* ==== NAVBAR BASE ==== */
+.navbar-modern {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.75);
+  border-bottom: 1px solid #ffd6e8;
+  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.08);
+}
+
+/* Wrapper agar responsif */
+.navbar-wrapper {
+  max-width: 1280px;
+  margin: auto;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none; /* Hilangkan scrollbar Firefox */
+}
+
+.navbar-wrapper::-webkit-scrollbar {
+  display: none; /* Hilangkan scrollbar Chrome/Safari */
+}
+
+/* ==== NAV TAB ==== */
+.nav-modern {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.65rem 1.2rem;
+  border-radius: 12px;
+  color: #666;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.25s ease-in-out;
+}
+
+/* Hover */
+.nav-modern:hover {
+  background: rgba(255, 182, 193, 0.18);
+  transform: translateY(-1px);
+  color: #d63384;
+}
+
+/* Active */
+.nav-modern.active {
+  background: rgba(255, 182, 193, 0.35);
+  color: #c2185b;
+}
+
+/* Underline Active */
+.nav-modern.active::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 36%;
+  height: 3px;
+  transform: translateX(-50%);
+  background: #ff4f9a;
+  border-radius: 4px;
+}
+
+/* Icon */
+.nav-modern i {
+  font-size: 1rem;
+  transition: 0.25s ease;
+}
+
+.nav-modern:hover i {
+  transform: scale(1.22);
+}
+
+/* ===== RESPONSIVE RULES ===== */
+
+/* 👉 HP kecil — hanya icon, text sembunyi */
+@media (max-width: 480px) {
+  .nav-modern span {
+    display: none;
+  }
+
+  .nav-modern {
+    padding: 0.55rem 0.9rem;
+  }
+
+  .nav-modern i {
+    font-size: 1.2rem;
+  }
+}
+
+/* 👉 iPad / Tablet */
+@media (min-width: 481px) and (max-width: 1024px) {
+  .nav-modern {
+    padding: 0.7rem 1rem;
+  }
+
+  .nav-modern i {
+    font-size: 1.1rem;
+  }
+
+  .nav-modern span {
+    font-size: 0.95rem;
+  }
+}
+
+/* 👉 Desktop */
+@media (min-width: 1025px) {
+  .nav-modern {
+    padding: 0.8rem 1.25rem;
+  }
+
+  .nav-modern span {
+    font-size: 1rem;
+  }
+}
+
+
 /* ============================
    NAV TAB – LEBIH MINIMALIS & IMUT
 ============================ */
