@@ -161,9 +161,17 @@ async function renderAbsensi() {
 // ===================================
 //            EXPORT EXCEL
 // ===================================
+// ===================================
+//        EXPORT EXCEL CANTIK
+// ===================================
 function exportToExcel(studentsArr, year, month) {
-  const rows = [];
+  const wb = XLSX.utils.book_new();
   const monthStr = `${year}-${String(month).padStart(2, "0")}`;
+
+  // =====================================================
+  // SHEET 1 → ABSENSI (menggunakan JSON → Worksheet)
+  // =====================================================
+  const rows = [];
 
   studentsArr.forEach((s) => {
     const row = {
@@ -178,12 +186,54 @@ function exportToExcel(studentsArr, year, month) {
     rows.push(row);
   });
 
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Absensi");
+  const wsAbs = XLSX.utils.json_to_sheet(rows);
 
+  // Bold header
+  const rangeAbs = XLSX.utils.decode_range(wsAbs["!ref"]);
+  for (let C = rangeAbs.s.c; C <= rangeAbs.e.c; C++) {
+    const cell = XLSX.utils.encode_cell({ r: 0, c: C });
+    if (wsAbs[cell]) {
+      wsAbs[cell].s = {
+        font: { bold: true },
+        alignment: { horizontal: "center" }
+      };
+    }
+  }
+
+  XLSX.utils.book_append_sheet(wb, wsAbs, "Absensi");
+
+  // =====================================================
+  // SHEET 2 → STATUS LIST (Normal + Abnormal)
+  // =====================================================
+  const suspectItems = [...document.querySelectorAll("#suspectList li")].map(li => li.textContent);
+  const honestItems = [...document.querySelectorAll("#honestList li")].map(li => li.textContent);
+
+  const listData = [
+    ["Kategori", "Nama"],
+    ...suspectItems.map(v => ["Abnormal", v]),
+    ...honestItems.map(v => ["Normal", v]),
+  ];
+
+  const wsList = XLSX.utils.aoa_to_sheet(listData);
+
+  // header bold
+  wsList["A1"].s = { font: { bold: true } };
+  wsList["B1"].s = { font: { bold: true } };
+
+  // Auto width
+  wsList["!cols"] = [
+    { wch: 12 },
+    { wch: 40 },
+  ];
+
+  XLSX.utils.book_append_sheet(wb, wsList, "Status List");
+
+  // =====================================================
+  // SAVE FILE
+  // =====================================================
   XLSX.writeFile(wb, `absensi_haid_${monthStr}.xlsx`);
 }
+
 
 // ===================================
 //                INIT
