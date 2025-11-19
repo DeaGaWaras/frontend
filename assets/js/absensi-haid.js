@@ -82,12 +82,13 @@ async function renderAbsensi() {
   summary.textContent = "Memuat data...";
 
   const monthVal = document.getElementById("monthPicker").value;
+  const classVal = document.getElementById("classPicker").value;  // Jika ada dropdown kelas
   const { year, month } = monthFromInput(monthVal);
   const monthStr = `${year}-${String(month).padStart(2, "0")}`;
 
   let response;
   try {
-    response = await getHaidAggregate(monthStr, null);  // Panggil API asli dengan month dan classId=null
+    response = await getHaidAggregate(monthStr, classVal || null);
   } catch (err) {
     summary.textContent = "Gagal memuat data: " + err.message;
     return;
@@ -106,7 +107,7 @@ async function renderAbsensi() {
     });
   });
 
-  // Sorting kelas → nama
+  // Sorting kelas → nama (untuk tabel saja)
   studentsArr.sort((a, b) => {
     const c = classCompare(a.kelas, b.kelas);
     if (c !== 0) return c;
@@ -155,14 +156,14 @@ async function renderAbsensi() {
 
   table.appendChild(tbody);
 
-  // Isi suspectList dan honestList berdasarkan kriteria
-  // Abnormal jika jumlah hari haid > 7 (sesuaikan kriteria jika perlu)
+  // Isi suspectList dan honestList TANPA sorting (urutan mengikuti data asli atau tabel)
+  // Abnormal dulu, lalu Normal
   studentsArr.forEach((info) => {
     const li = createEl("li", {}, `${info.name} (${info.kelas}) - ${info.days.size} hari`);
     if (info.days.size > 7) {
-      suspectList.appendChild(li);
+      suspectList.appendChild(li);  // Abnormal
     } else {
-      honestList.appendChild(li);
+      honestList.appendChild(li);  // Normal
     }
   });
 
