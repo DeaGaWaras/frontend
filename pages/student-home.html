@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>absensi Saya - SMAN1KE</title>
+    <title>dzuhurKU - SMAN1KE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -26,10 +26,10 @@
           <div
             class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center font-bold"
           >
-            SK
+            DKU
           </div>
           <div>
-            <h1 class="text-xl font-bold">SMAN1KE</h1>
+            <h1 class="text-xl font-bold">dzuhurKU</h1>
             <p class="text-xs text-white/80">Sistem Absensi Digital</p>
           </div>
         </div>
@@ -52,7 +52,7 @@
     <nav class="bg-white border-b border-pink-100 sticky top-16 z-40">
       <div class="max-w-7xl mx-auto px-4 flex gap-8 overflow-x-auto">
         <button class="nav-tab active" data-tab="absensi">
-          <i class="fas fa-clipboard-list mr-2"></i>absensi Saya
+          <i class="fas fa-clipboard-list mr-2"></i>Absensi Saya
         </button>
         <button class="nav-tab" data-tab="profile">
           <i class="fas fa-user mr-2"></i>Profil
@@ -326,7 +326,7 @@
 
         try {
           const response = await fetch(
-            `http://localhost:3000/api/absensi/${id}`,
+            `https://backend-eta-ashen-11.vercel.app//api/absensi/${id}`,
             {
               method: "DELETE",
               headers: {

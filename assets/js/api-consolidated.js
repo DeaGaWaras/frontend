@@ -2,7 +2,7 @@
 // api-consolidated.js — Unified API Layer
 // ======================================================
 
-const API_BASE = "https://deagawaras.github.io/backend/api";
+const API_BASE = "https://backend-eta-ashen-11.vercel.app/api/";
 
 /**
  * Wrapper universal untuk request API.
