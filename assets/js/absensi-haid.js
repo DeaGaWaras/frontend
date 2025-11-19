@@ -1,7 +1,19 @@
 // absensi-haid.js
 // Renderer + export excel untuk absensi haid
 
-import { getHaidAggregate } from "./api-consolidated.js";
+// Mock untuk getHaidAggregate jika API tidak tersedia
+// Ganti ini dengan import asli jika API ada
+function getHaidAggregate(monthStr) {
+  // Simulasi data: Array siswi dengan days sebagai array hari haid
+  return Promise.resolve({
+    data: [
+      { studentId: 1, name: "Siswa A", kelas: "X-1", days: [1, 2, 3, 4, 5, 6, 7, 8] }, // Abnormal (>7 hari)
+      { studentId: 2, name: "Siswa B", kelas: "X-2", days: [10, 11, 12] }, // Normal
+      { studentId: 3, name: "Siswa C", kelas: "XI-1", days: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }, // Abnormal
+      // Tambahkan lebih banyak data simulasi jika perlu
+    ]
+  });
+}
 
 const DAYS = 31;
 
@@ -9,7 +21,7 @@ const DAYS = 31;
 function createEl(tag, attrs = {}, text) {
   const el = document.createElement(tag);
   Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-  if (text !== undefined) el.textContent = text;
+  if (text !== undefined) el.textContent = text; // Perbaikan: !== undefined
   return el;
 }
 
@@ -155,39 +167,40 @@ async function renderAbsensi() {
 
   table.appendChild(tbody);
 
+  // Isi suspectList dan honestList berdasarkan kriteria
+  // Abnormal jika jumlah hari haid > 7 (sesuaikan kriteria jika perlu)
+  studentsArr.forEach((info) => {
+    const li = createEl("li", {}, `${info.name} (${info.kelas}) - ${info.days.size} hari`);
+    if (info.days.size > 7) {
+      suspectList.appendChild(li);
+    } else {
+      honestList.appendChild(li);
+    }
+  });
+
   summary.textContent = `Menampilkan ${studentsArr.length} siswi untuk ${monthStr}.`;
 }
 
 // ===================================
 //            EXPORT EXCEL
 // ===================================
-// ===================================
-//        EXPORT EXCEL CANTIK
-// ===================================
 function exportToExcel(studentsArr, year, month) {
   const wb = XLSX.utils.book_new();
   const monthStr = `${year}-${String(month).padStart(2, "0")}`;
 
-  // =====================================================
-  // SHEET 1 → ABSENSI (menggunakan JSON → Worksheet)
-  // =====================================================
+  // SHEET 1 → ABSENSI
   const rows = [];
-
   studentsArr.forEach((s) => {
     const row = {
       Nama: s.name,
       Kelas: s.kelas,
     };
-
     for (let d = 1; d <= 31; d++) {
       row[`Tgl ${d}`] = s.days.has(d) ? "X" : "-";
     }
-
     rows.push(row);
   });
-
   const wsAbs = XLSX.utils.json_to_sheet(rows);
-
   // Bold header
   const rangeAbs = XLSX.utils.decode_range(wsAbs["!ref"]);
   for (let C = rangeAbs.s.c; C <= rangeAbs.e.c; C++) {
@@ -199,41 +212,30 @@ function exportToExcel(studentsArr, year, month) {
       };
     }
   }
-
   XLSX.utils.book_append_sheet(wb, wsAbs, "Absensi");
 
-  // =====================================================
-  // SHEET 2 → STATUS LIST (Normal + Abnormal)
-  // =====================================================
+  // SHEET 2 → STATUS LIST
   const suspectItems = [...document.querySelectorAll("#suspectList li")].map(li => li.textContent);
   const honestItems = [...document.querySelectorAll("#honestList li")].map(li => li.textContent);
-
   const listData = [
     ["Kategori", "Nama"],
     ...suspectItems.map(v => ["Abnormal", v]),
     ...honestItems.map(v => ["Normal", v]),
   ];
-
   const wsList = XLSX.utils.aoa_to_sheet(listData);
-
-  // header bold
+  // Header bold
   wsList["A1"].s = { font: { bold: true } };
   wsList["B1"].s = { font: { bold: true } };
-
   // Auto width
   wsList["!cols"] = [
     { wch: 12 },
     { wch: 40 },
   ];
-
   XLSX.utils.book_append_sheet(wb, wsList, "Status List");
 
-  // =====================================================
   // SAVE FILE
-  // =====================================================
   XLSX.writeFile(wb, `absensi_haid_${monthStr}.xlsx`);
 }
-
 
 // ===================================
 //                INIT
@@ -245,17 +247,14 @@ function init() {
 
   // Set default bulan sekarang
   const now = new Date();
-  picker.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}`;
+  picker.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   refresh.addEventListener("click", (e) => {
     e.preventDefault();
     renderAbsensi();
   });
 
-  // tombol download excel
+  // Tombol download excel
   excelBtn.addEventListener("click", () => {
     const monthVal = picker.value;
     const { year, month } = monthFromInput(monthVal);
