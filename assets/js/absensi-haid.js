@@ -1,19 +1,7 @@
 // absensi-haid.js
 // Renderer + export excel untuk absensi haid
 
-// Mock untuk getHaidAggregate jika API tidak tersedia
-// Ganti ini dengan import asli jika API ada
-function getHaidAggregate(monthStr) {
-  // Simulasi data: Array siswi dengan days sebagai array hari haid
-  return Promise.resolve({
-    data: [
-      { studentId: 1, name: "Siswa A", kelas: "X-1", days: [1, 2, 3, 4, 5, 6, 7, 8] }, // Abnormal (>7 hari)
-      { studentId: 2, name: "Siswa B", kelas: "X-2", days: [10, 11, 12] }, // Normal
-      { studentId: 3, name: "Siswa C", kelas: "XI-1", days: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] }, // Abnormal
-      // Tambahkan lebih banyak data simulasi jika perlu
-    ]
-  });
-}
+import { getHaidAggregate } from "./api-consolidated.js";  // Import asli dari api-consolidated.js
 
 const DAYS = 31;
 
@@ -21,7 +9,7 @@ const DAYS = 31;
 function createEl(tag, attrs = {}, text) {
   const el = document.createElement(tag);
   Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-  if (text !== undefined) el.textContent = text; // Perbaikan: !== undefined
+  if (text !== undefined) el.textContent = text;
   return el;
 }
 
@@ -99,7 +87,7 @@ async function renderAbsensi() {
 
   let response;
   try {
-    response = await getHaidAggregate(monthStr);
+    response = await getHaidAggregate(monthStr, null);  // Panggil API asli dengan month dan classId=null
   } catch (err) {
     summary.textContent = "Gagal memuat data: " + err.message;
     return;
