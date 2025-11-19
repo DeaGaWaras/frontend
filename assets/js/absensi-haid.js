@@ -1,11 +1,9 @@
-// absensi-haid.js
-// Renderer + export excel untuk absensi haid
-
-import { getHaidAggregate } from "./api-consolidated.js";  // Import asli dari api-consolidated.js
+ // absensi-haid.js
+// Frontend renderer + heuristic detection untuk absensi haid
+import { getHaidAggregate } from "./api-consolidated.js";
 
 const DAYS = 31;
 
-// Helper to create element
 function createEl(tag, attrs = {}, text) {
   const el = document.createElement(tag);
   Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
@@ -13,7 +11,15 @@ function createEl(tag, attrs = {}, text) {
   return el;
 }
 
+function parseDateString(s) {
+  // Try parsing ISO-like date strings
+  const d = new Date(s);
+  if (!isNaN(d)) return d;
+  return null;
+}
+
 function monthFromInput(value) {
+  // value = "YYYY-MM"
   if (!value) {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() + 1 };
@@ -22,10 +28,49 @@ function monthFromInput(value) {
   return { year: parseInt(y, 10), month: parseInt(m, 10) };
 }
 
-// Normalizer kelas
+function sameMonthYear(dateObj, year, month) {
+  return dateObj.getFullYear() === year && dateObj.getMonth() + 1 === month;
+}
+
+function analyzeDays(daySet) {
+  // daySet: Set<number> of days with X
+  if (!daySet || daySet.size === 0) return { honest: false, suspect: false };
+  const days = Array.from(daySet).sort((a, b) => a - b);
+
+  // find consecutive sequences
+  let maxSeq = 1;
+  let curSeq = 1;
+  for (let i = 1; i < days.length; i++) {
+    if (days[i] === days[i - 1] + 1) {
+      curSeq++;
+      if (curSeq > maxSeq) maxSeq = curSeq;
+    } else {
+      curSeq = 1;
+    }
+  }
+
+  // detect small gaps (1-2 empty days between Xs)
+  let hasSmallGap = false;
+  for (let i = 1; i < days.length; i++) {
+    const gapEmpty = days[i] - days[i - 1] - 1; // number of empty days between
+    if (gapEmpty >= 1 && gapEmpty <= 2) {
+      hasSmallGap = true;
+      break;
+    }
+  }
+
+  return {
+    honest: maxSeq >= 4, // 4 atau lebih berurutan -> jujur
+    suspect: hasSmallGap && days.length >= 2,
+    total: days.length,
+    maxSeq,
+  };
+}
+
 function normalizeClass(cls) {
   if (!cls) return { grade: 99, section: "" };
   let s = String(cls).trim().toUpperCase();
+  // remove common separators
   s = s.replace(/[.\-\/_\s]+/g, "");
   let grade = 99;
   let section = "";
@@ -44,31 +89,35 @@ function normalizeClass(cls) {
       grade = parseInt(m[1], 10);
       section = m[2] || "";
     } else {
+      // fallback: try to extract leading number
       const mm = s.match(/^(\d+)/);
       if (mm) {
         grade = parseInt(mm[1], 10);
         section = s.slice(mm[1].length) || "";
       } else {
+        // unknown format: push to end
         grade = 99;
         section = s;
       }
     }
   }
+  // normalize section to a single letter or string for sorting
+  section = section || "";
   return { grade, section };
 }
 
 function classCompare(a, b) {
+  // a and b are class strings
   const na = normalizeClass(a || "");
   const nb = normalizeClass(b || "");
   if (na.grade !== nb.grade) return na.grade - nb.grade;
+  // compare section lexicographically
   const sa = na.section || "";
   const sb = nb.section || "";
-  return sa.localeCompare(sb);
+  if (sa === sb) return 0;
+  return sa < sb ? -1 : 1;
 }
 
-// ================================
-//           RENDER TABLE
-// ================================
 async function renderAbsensi() {
   const table = document.getElementById("absensiTable");
   const suspectList = document.getElementById("suspectList");
@@ -78,184 +127,154 @@ async function renderAbsensi() {
   table.innerHTML = "";
   suspectList.innerHTML = "";
   honestList.innerHTML = "";
-
   summary.textContent = "Memuat data...";
 
   const monthVal = document.getElementById("monthPicker").value;
-  const classVal = document.getElementById("classPicker").value;  // Jika ada dropdown kelas
   const { year, month } = monthFromInput(monthVal);
   const monthStr = `${year}-${String(month).padStart(2, "0")}`;
 
   let response;
   try {
-    response = await getHaidAggregate(monthStr, classVal || null);
+    // Call optimized aggregated endpoint from backend
+    // Backend returns { success: true, data: [{ studentId, name, classId, days: [1,2,3...] }] }
+    response = await getHaidAggregate(monthStr);
   } catch (err) {
-    summary.textContent = "Gagal memuat data: " + err.message;
+    summary.textContent = "Gagal memuat data absensi: " + err.message;
     return;
   }
 
+  // Backend returns aggregated data: [{ studentId, name, classId, days: [1,2,3...] }]
+  // days array contains day numbers (1-31) for haid absensi in the requested month
   const data = response.data || response || [];
   const studentsArr = [];
-
-  data.forEach((item) => {
-    if (!item || !item.studentId) return;
-    studentsArr.push({
-      studentId: item.studentId,
-      name: item.name || item.nama,
-      kelas: item.classId || item.kelas,
-      days: new Set(item.days || []),
+  if (Array.isArray(data)) {
+    data.forEach((item) => {
+      if (!item || !item.studentId) return;
+      const sid = item.studentId;
+      const name = item.name || item.nama || `Siswa ${sid}`;
+      const kelas = item.classId || item.kelas || "-";
+      const daysSet = new Set(item.days || []);
+      studentsArr.push({ studentId: sid, name, kelas, days: daysSet });
     });
-  });
+  }
 
-  // Sorting kelas → nama (untuk tabel saja)
+  // sort students by kelas (10..11..12 then section) then by name
   studentsArr.sort((a, b) => {
     const c = classCompare(a.kelas, b.kelas);
     if (c !== 0) return c;
     return (a.name || "").localeCompare(b.name || "");
   });
 
-  // Simpan global untuk export excel
-  window._lastAbsensiData = studentsArr;
-
-  // Render table Head
+  // Table header
   const thead = createEl("thead");
   const trh = createEl("tr");
-
-  trh.appendChild(createEl("th", { class: "p-2 border" }, "No"));
-  trh.appendChild(createEl("th", { class: "p-2 border" }, "Nama"));
-  trh.appendChild(createEl("th", { class: "p-2 border text-center" }, "Kelas"));
-
+  trh.appendChild(createEl("th", { class: "p-2 border text-left" }, "No"));
+  trh.appendChild(createEl("th", { class: "p-2 border text-left" }, "Nama"));
+  trh.appendChild(
+    createEl("th", { class: "p-2 border text-center w-20" }, "Kelas")
+  );
   for (let d = 1; d <= DAYS; d++) {
     trh.appendChild(
-      createEl("th", { class: "p-1 border text-center" }, String(d))
+      createEl("th", { class: "p-1 border text-center w-6" }, String(d))
     );
   }
-
   thead.appendChild(trh);
   table.appendChild(thead);
 
-  // Render table Body
   const tbody = createEl("tbody");
+
   let idx = 1;
-
-  studentsArr.forEach((info) => {
+  for (const info of studentsArr) {
     const tr = createEl("tr");
+    tr.appendChild(
+      createEl("td", { class: "p-1 border text-sm" }, String(idx++))
+    );
+    const nameCell = createEl("td", {
+      class: "p-1 border text-sm font-medium text-left",
+    });
+    nameCell.textContent = info.name;
+    const small = createEl(
+      "div",
+      { class: "text-xs text-gray-500 mt-1" },
+      `📚 ${info.kelas}`
+    );
+    nameCell.appendChild(small);
+    tr.appendChild(nameCell);
 
-    tr.appendChild(createEl("td", { class: "p-1 border" }, idx++));
-    tr.appendChild(createEl("td", { class: "p-1 border" }, info.name));
-    tr.appendChild(createEl("td", { class: "p-1 border text-center" }, info.kelas));
+    // Kelas column
+    tr.appendChild(
+      createEl("td", { class: "p-1 border text-sm text-center" }, info.kelas)
+    );
 
     for (let d = 1; d <= DAYS; d++) {
-      const cell = createEl("td", { class: "p-1 border text-center" });
-      cell.textContent = info.days.has(d) ? "X" : "-";
+      const cell = createEl("td", { class: "p-1 border text-center text-sm" });
+      if (info.days.has(d)) {
+        cell.textContent = "X";
+        cell.classList.add("text-red-600", "font-semibold");
+      } else {
+        cell.textContent = "-";
+        cell.classList.add("text-gray-400");
+      }
       tr.appendChild(cell);
     }
 
     tbody.appendChild(tr);
-  });
+  }
 
   table.appendChild(tbody);
 
-  // Isi suspectList dan honestList TANPA sorting (urutan mengikuti data asli atau tabel)
-  // Abnormal dulu, lalu Normal
-  studentsArr.forEach((info) => {
-    const li = createEl("li", {}, `${info.name} (${info.kelas}) - ${info.days.size} hari`);
-    if (info.days.size > 7) {
-      suspectList.appendChild(li);  // Abnormal
-    } else {
-      honestList.appendChild(li);  // Normal
-    }
-  });
-
-  summary.textContent = `Menampilkan ${studentsArr.length} siswi untuk ${monthStr}.`;
-}
-
-// ===================================
-//            EXPORT EXCEL
-// ===================================
-function exportToExcel(studentsArr, year, month) {
-  const wb = XLSX.utils.book_new();
-  const monthStr = `${year}-${String(month).padStart(2, "0")}`;
-
-  // SHEET 1 → ABSENSI
-  const rows = [];
-  studentsArr.forEach((s) => {
-    const row = {
-      Nama: s.name,
-      Kelas: s.kelas,
-    };
-    for (let d = 1; d <= 31; d++) {
-      row[`Tgl ${d}`] = s.days.has(d) ? "X" : "-";
-    }
-    rows.push(row);
-  });
-  const wsAbs = XLSX.utils.json_to_sheet(rows);
-  // Bold header
-  const rangeAbs = XLSX.utils.decode_range(wsAbs["!ref"]);
-  for (let C = rangeAbs.s.c; C <= rangeAbs.e.c; C++) {
-    const cell = XLSX.utils.encode_cell({ r: 0, c: C });
-    if (wsAbs[cell]) {
-      wsAbs[cell].s = {
-        font: { bold: true },
-        alignment: { horizontal: "center" }
-      };
-    }
+  // Analyze patterns
+  const suspects = [];
+  const honest = [];
+  for (const info of studentsArr) {
+    const an = analyzeDays(info.days);
+    if (an.honest)
+      honest.push({
+        id: info.studentId,
+        name: info.name,
+        total: an.total,
+        maxSeq: an.maxSeq,
+      });
+    else if (an.suspect)
+      suspects.push({ id: info.studentId, name: info.name, total: an.total });
   }
-  XLSX.utils.book_append_sheet(wb, wsAbs, "Absensi");
 
-  // SHEET 2 → STATUS LIST
-  const suspectItems = [...document.querySelectorAll("#suspectList li")].map(li => li.textContent);
-  const honestItems = [...document.querySelectorAll("#honestList li")].map(li => li.textContent);
-  const listData = [
-    ["Kategori", "Nama"],
-    ...suspectItems.map(v => ["Abnormal", v]),
-    ...honestItems.map(v => ["Normal", v]),
-  ];
-  const wsList = XLSX.utils.aoa_to_sheet(listData);
-  // Header bold
-  wsList["A1"].s = { font: { bold: true } };
-  wsList["B1"].s = { font: { bold: true } };
-  // Auto width
-  wsList["!cols"] = [
-    { wch: 12 },
-    { wch: 40 },
-  ];
-  XLSX.utils.book_append_sheet(wb, wsList, "Status List");
+  if (suspects.length === 0 && honest.length === 0) {
+    summary.textContent = `Tidak ada data haid untuk ${monthStr}.`;
+  } else {
+    summary.textContent = `Menampilkan ${studentsArr.length} siswi untuk ${monthStr}.`;
+  }
 
-  // SAVE FILE
-  XLSX.writeFile(wb, `absensi_haid_${monthStr}.xlsx`);
+  suspects.forEach((s) => {
+    const li = createEl("li", {}, `${s.name} — total X: ${s.total}`);
+    suspectList.appendChild(li);
+  });
+  honest.forEach((h) => {
+    const li = createEl(
+      "li",
+      {},
+      `${h.name} — total X: ${h.total}, berurutan: ${h.maxSeq}`
+    );
+    honestList.appendChild(li);
+  });
 }
 
-// ===================================
-//                INIT
-// ===================================
 function init() {
   const picker = document.getElementById("monthPicker");
   const refresh = document.getElementById("refreshBtn");
-  const excelBtn = document.getElementById("downloadExcel");
-
-  // Set default bulan sekarang
+  // set default to current month
   const now = new Date();
-  picker.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  picker.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}`;
 
   refresh.addEventListener("click", (e) => {
     e.preventDefault();
     renderAbsensi();
   });
 
-  // Tombol download excel
-  excelBtn.addEventListener("click", () => {
-    const monthVal = picker.value;
-    const { year, month } = monthFromInput(monthVal);
-
-    if (!window._lastAbsensiData || window._lastAbsensiData.length === 0) {
-      alert("Data belum siap diunduh!");
-      return;
-    }
-
-    exportToExcel(window._lastAbsensiData, year, month);
-  });
-
+  // render once
   renderAbsensi();
 }
 
