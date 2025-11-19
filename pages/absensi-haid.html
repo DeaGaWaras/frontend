@@ -12,7 +12,7 @@
     />
     <link rel="stylesheet" href="../assets/css/styles.css" />
     <link rel="icon" href="../assets/images/favicon.ico">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js" defer></script>  <!-- Tambah defer untuk performa -->
   </head>
 
   <body class="bg-gray-100 min-h-screen p-6">
@@ -29,7 +29,7 @@
         </button>
 
         <button
-          onclick="window.location.href='./absensi.html'"
+          onclick="window.close()"  <!-- Perbaikan: Ubah ke window.close() untuk menutup halaman/tab -->
           class="text-gray-500 hover:text-gray-800 bg-white px-4 py-2 shadow rounded-lg transition"
         >
           <i class="fas fa-times text-lg"></i>
@@ -104,10 +104,21 @@
 
     <!-- JS -->
     <script type="module">
-      // Jika auth-consolidated.js ada, gunakan; jika tidak, hapus baris ini
-      import { pageGuard } from "../assets/js/auth-consolidated.js";
-       pageGuard();
-      import "./absensi-haid.js";  // Pastikan path benar
+      try {
+        // Import pageGuard jika ada; jika tidak, skip
+        import { pageGuard } from "../assets/js/auth-consolidated.js";
+        pageGuard();  // Jalankan auth guard
+      } catch (error) {
+        console.warn("Auth module not found, skipping pageGuard:", error);
+        // Jika tidak ada, lanjutkan tanpa auth
+      }
+
+      try {
+        import "../assets/js/absensi-haid.js";  // Pastikan path benar; jika tidak, ubah ke "../assets/js/absensi-haid.js"
+      } catch (error) {
+        console.error("Failed to load absensi-haid.js:", error);
+        alert("Error loading application. Check console for details.");
+      }
     </script>
   </body>
 </html>
