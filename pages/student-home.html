@@ -164,103 +164,120 @@
       };
 
       /* ==================== absensi ==================== */
-      async function showabsensi() {
-        const container = document.getElementById("content");
+     async function showabsensi() {
+  const container = document.getElementById("content");
 
-        container.innerHTML = `<div class="text-center py-12"><i class="fas fa-spinner animate-spin text-4xl"></i></div>`;
+  // Loading state
+  container.innerHTML = `
+    <div class="text-center py-12">
+      <i class="fas fa-spinner animate-spin text-4xl text-pink-500"></i>
+    </div>`;
 
-        try {
-          const res = await getabsensiList();
-          const list = res.data || res || [];
+  try {
+    const res = await getabsensiList();
+    const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
 
-          let html = `
-        <div class="space-y-6">
-          <div class="flex justify-between items-center">
-            <div>
-              <h2 class="text-3xl font-bold">📋 Riwayat absensi Saya</h2>
-              <p>Kelola absensi dan pantau statusnya</p>
-            </div>
-            <button onclick="openabsensiModal()" class="btn-primary px-6 py-3 rounded-lg">
-              <i class="fas fa-plus mr-2"></i>absensi Baru
-            </button>
+    let html = `
+      <div class="space-y-6">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center flex-wrap gap-3">
+          <div>
+            <h2 class="text-3xl font-bold">📋 Riwayat Absensi Saya</h2>
+            <p class="text-gray-600">Kelola absensi dan pantau status</p>
           </div>
 
-          <div class="card-modern overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead class="bg-pink-50">
-                  <tr>
-                    <th class="px-6 py-4 text-left">Alasan</th>
-                    <th class="px-6 py-4 text-left">Tanggal</th>
-                    <th class="px-6 py-4 text-left">Status</th>
-                    <th class="px-6 py-4 text-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y">`;
+          <button onclick="openabsensiModal()" 
+            class="btn-primary px-6 py-3 rounded-lg flex items-center gap-2">
+            <i class="fas fa-plus"></i>
+            Absensi Baru
+          </button>
+        </div>
 
-          if (list.length === 0) {
-            html += `
-                  <tr>
-                    <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                      <i class="fas fa-inbox text-4xl mb-4"></i>
-                      <p>Belum ada absensi</p>
-                    </td>
-                  </tr>`;
-          } else {
-            list.forEach((absensi) => {
-              const statusColors = {
-                approved: "bg-green-100 text-green-800",
-                pending: "bg-yellow-100 text-yellow-800",
-                rejected: "bg-red-100 text-red-800",
-              };
-              const statusColor =
-                statusColors[absensi.status] || "bg-gray-100 text-gray-800";
+        <!-- Table -->
+        <div class="card-modern overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[650px]">
+              <thead class="bg-pink-50">
+                <tr>
+                  <th class="px-6 py-4 text-left">Alasan</th>
+                  <th class="px-6 py-4 text-left">Tanggal</th>
+                  <th class="px-6 py-4 text-left">Status</th>
+                  <th class="px-6 py-4 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+    `;
 
-              html += `
-                  <tr>
-                    <td class="px-6 py-4 font-semibold">${absensi.alasan}</td>
-                    <td class="px-6 py-4">
-                      ${formatDate(absensi.tanggalMulai)}${
-                absensi.tanggalSelesai
-                  ? " s/d " + formatDate(absensi.tanggalSelesai)
-                  : ""
+    // Jika kosong
+    if (list.length === 0) {
+      html += `
+        <tr>
+          <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+            <i class="fas fa-inbox text-4xl mb-4"></i>
+            <p>Belum ada absensi</p>
+          </td>
+        </tr>`;
+    } else {
+      list.forEach((absensi) => {
+        const statusClasses = {
+          approved: "bg-green-100 text-green-800",
+          pending: "bg-yellow-100 text-yellow-800",
+          rejected: "bg-red-100 text-red-800",
+        };
+
+        const statusClass = statusClasses[absensi.status] || "bg-gray-100 text-gray-800";
+
+        html += `
+          <tr>
+            <td class="px-6 py-4 font-semibold">${absensi.alasan || "-"}</td>
+
+            <td class="px-6 py-4">
+              ${formatDate(absensi.tanggalMulai)}
+              ${absensi.tanggalSelesai ? " s/d " + formatDate(absensi.tanggalSelesai) : ""}
+            </td>
+
+            <td class="px-6 py-4">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusClass}">
+                ${absensi.status?.toUpperCase()}
+              </span>
+            </td>
+
+            <td class="px-6 py-4 text-center">
+              ${
+                absensi.status === "pending"
+                  ? `
+              <button onclick="deleteabsensi('${absensi._id}')"
+                class="text-red-600 hover:text-red-800 font-semibold flex items-center gap-1 mx-auto">
+                <i class="fas fa-trash"></i> Batalkan
+              </button>`
+                  : "-"
               }
-                    </td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColor}">
-                        ${absensi.status.toUpperCase()}
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                      ${
-                        absensi.status === "pending"
-                          ? `<button onclick="deleteabsensi('${absensi._id}')" class="text-red-600 hover:text-red-800 font-semibold">
-                        <i class="fas fa-trash mr-1"></i>Batalkan
-                      </button>`
-                          : "-"
-                      }
-                    </td>
-                  </tr>`;
-            });
-          }
+            </td>
+          </tr>
+        `;
+      });
+    }
 
-          html += `
-                </tbody>
-              </table>
-            </div>
+    html += `
+              </tbody>
+            </table>
           </div>
-        </div>`;
+        </div>
 
-          container.innerHTML = html;
-        } catch (err) {
-          console.error("absensi error:", err);
-          container.innerHTML = `<div class="card-modern p-8 text-center">
-            <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
-            <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
-            <p class="text-gray-600 mt-2">${err.message}</p>
-          </div>`;
-        }
-      }
+      </div>`;
+
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("absensi error:", err);
+    container.innerHTML = `
+      <div class="card-modern p-8 text-center">
+        <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
+        <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
+        <p class="text-gray-600 mt-2">${err.message}</p>
+      </div>`;
+  }
+}
 
       /* ==================== PROFILE ==================== */
       async function showProfile() {

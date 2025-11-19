@@ -316,299 +316,177 @@
         }
       }
 
-      /* ==================== absensi ==================== */
-      async function showabsensi() {
-        const role = getUserRole();
-        const container = document.getElementById("content");
+      /* ==================== ABSENSI ==================== */
+async function showabsensi() {
+  const role = getUserRole();
+  const container = document.getElementById("content");
 
-        container.innerHTML = `<div class="text-center py-12"><i class="fas fa-spinner animate-spin text-4xl"></i></div>`;
+  container.innerHTML = `
+    <div class="flex justify-center py-12">
+      <i class="fas fa-spinner animate-spin text-4xl text-pink-400"></i>
+    </div>
+  `;
 
-        try {
-          // For guru show aggregated haid data (kehilangan: use aggregated endpoint)
-          let list = [];
-          if (role === "guru") {
-            const now = new Date();
-            const monthStr = `${now.getFullYear()}-${String(
-              now.getMonth() + 1
-            ).padStart(2, "0")}`;
-            try {
-              const resH = await getHaidAggregate(monthStr);
-              list = (resH && (resH.data || resH)) || [];
-            } catch (err) {
-              console.error("Failed to load haid aggregate:", err);
-              throw err;
-            }
-          } else {
-            const res = await getabsensiList();
-            list = res.data || res || [];
-          }
+  try {
+    let list = [];
 
-          let html = `
-        <div class="space-y-6">
-          <div class="flex justify-between items-center">
-            <div>
-              <h2 class="text-3xl font-bold">${
-                role === "guru"
-                  ? "📋 Data Absensi Siswi"
-                  : "📋 Riwayat Absensi Saya"
-              }</h2>
-              <p>Kelola dan pantau absensi siswi</p>
-            </div>`;
+    if (role === "guru") {
+      const now = new Date();
+      const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-          if (role === "siswi") {
-            html += `<button onclick="openabsensiModal()" class="btn-primary px-6 py-3"><i class="fas fa-plus mr-2"></i>Buat absensi</button>`;
-          }
+      const resH = await getHaidAggregate(monthStr);
+      list = (resH && (resH.data || resH)) || [];
+    } else {
+      const res = await getabsensiList();
+      list = res.data || res || [];
+    }
 
-          // Untuk guru: tombol cepat ke halaman Absensi Haid
-          if (role === "guru") {
-            html += `<button onclick="window.location.href='./absensi-haid.html'" class="px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 ml-3"><i class="fas fa-heart mr-2"></i>Absensi Haid</button>`;
-          }
-
-          html += `</div>`;
-
-          if (!list.length) {
-            html += `<div class="card-modern p-12 text-center"><i class="fas fa-inbox text-5xl text-gray-300"></i><p class="mt-4">Belum ada data absensi</p></div>`;
-          } else {
-            html += `<div class="space-y-3">`;
-            // If teacher and aggregated haid list (items with studentId, name, classId, days array)
-            if (role === "guru" && list.length && list[0].days !== undefined) {
-              // helper: analyze days for heuristics
-              const analyzeDaysLocal = (dayArr) => {
-                const days = Array.from(
-                  new Set((dayArr || []).map(Number))
-                ).sort((a, b) => a - b);
-                if (!days.length)
-                  return { honest: false, suspect: false, total: 0, maxSeq: 0 };
-                let maxSeq = 1,
-                  cur = 1;
-                for (let i = 1; i < days.length; i++) {
-                  if (days[i] === days[i - 1] + 1) {
-                    cur++;
-                    if (cur > maxSeq) maxSeq = cur;
-                  } else cur = 1;
-                }
-                let hasSmallGap = false;
-                for (let i = 1; i < days.length; i++) {
-                  const gap = days[i] - days[i - 1] - 1;
-                  if (gap >= 1 && gap <= 2) {
-                    hasSmallGap = true;
-                    break;
-                  }
-                }
-                return {
-                  honest: maxSeq >= 4,
-                  suspect: hasSmallGap && days.length >= 2,
-                  total: days.length,
-                  maxSeq,
-                };
-              };
-
-              html += list
-                .map((i) => {
-                  const name = i.name || i.nama || "-";
-                  const kelas = i.classId || i.kelas || "-";
-                  const days = i.days || [];
-                  const an = analyzeDaysLocal(days);
-                  const statusLabel = an.honest
-                    ? "JUJUR"
-                    : an.suspect
-                    ? "DIDUGA BOLOS"
-                    : "TERCATAT";
-                  const badgeClass = an.honest
-                    ? "border-green-500"
-                    : an.suspect
-                    ? "border-red-500"
-                    : "border-yellow-500";
-                  return `
-                  <div class="card-modern p-5 border-l-4 ${badgeClass}">
-                    <div class="flex justify-between items-start mb-3">
-                      <div>
-                        <h4 class="font-bold">${name}</h4>
-                        <p class="text-xs mt-1">📚 ${kelas}</p>
-                      </div>
-                      <span class="badge-status">${statusLabel}</span>
-                    </div>
-                    <p><i class="fas fa-calendar mr-2 text-pink-400"></i>Hari: ${
-                      days.join(", ") || "-"
-                    }</p>
-                    <p><i class="fas fa-file-alt mr-2 text-purple-400"></i>Total X: ${
-                      an.total
-                    }</p>
-                  </div>`;
-                })
-                .join("");
-            } else {
-              // fallback: original per-entry rendering for siswa or other shapes
-              html += list
-                .map(
-                  (i) => `
-              <div class="card-modern p-5 border-l-4 ${
-                i.status === "approved"
-                  ? "border-green-500"
-                  : i.status === "rejected"
-                  ? "border-red-500"
-                  : "border-yellow-500"
-              }">
-                <div class="flex justify-between items-start mb-3">
-                  <div>
-                    <h4 class="font-bold">${i.nama || i.siswi?.name || "-"}</h4>
-                    <p class="text-xs mt-1">📚 ${
-                      i.kelas || i.siswi?.kelas || "-"
-                    }</p>
-                  </div>
-                  <span class="badge-status badge-${
-                    i.status
-                  }">${i.status.toUpperCase()}</span>
-                </div>
-
-                <p><i class="fas fa-calendar mr-2 text-pink-400"></i>${formatDate(
-                  i.tanggalMulai
-                )}${
-                    i.tanggalSelesai
-                      ? " s/d " + formatDate(i.tanggalSelesai)
-                      : ""
-                  }</p>
-                <p><i class="fas fa-file-alt mr-2 text-purple-400"></i>${
-                  i.alasan || "-"
-                }</p>
-              </div>`
-                )
-                .join("");
-            }
-            html += `</div>`;
-          }
-
-          html += `</div>`;
-          container.innerHTML = html;
-        } catch (err) {
-          console.error("absensi list error:", err);
-          const errorMsg = err.message || "Data Tidak Tersedia";
-          const isServerError =
-            errorMsg.includes("$") || errorMsg.includes("caused by");
-          container.innerHTML = `<div class="card-modern p-8 text-center">
-            <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
-            <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
-            <p class="text-gray-600 mt-2">${errorMsg}</p>
-            ${
-              isServerError
-                ? '<p class="text-xs text-red-500 mt-4">⚠️ Error dari backend — hubungi administrator</p>'
-                : ""
-            }
-          </div>`;
-        }
-      }
-
-      /* ==================== GURU ==================== */
-      async function showGuru() {
-        const container = document.getElementById("content");
-        container.innerHTML = `<div class="text-center py-12"><i class="fas fa-spinner animate-spin text-4xl text-pink-400"></i></div>`;
-
-        try {
-          const res = await getGuruList();
-          const list = res.data || res || [];
-
-          let html = `
-        <div class="space-y-6">
+    let html = `
+      <div class="space-y-6">
+        
+        <!-- HEADER TITLE -->
+        <div class="flex justify-between items-center flex-wrap gap-3">
           <div>
-            <h2 class="text-3xl font-bold">👨‍🏫 Data Guru</h2>
-            <p>Daftar guru pembina SMAN1KE</p>
-          </div>`;
+            <h2 class="text-3xl font-bold leading-tight">
+              ${role === "guru" ? "📋 Data Absensi Siswi" : "📋 Riwayat Absensi Saya"}
+            </h2>
+            <p class="text-gray-600 mt-1">Kelola dan pantau absensi</p>
+          </div>
+    `;
 
-          if (!list.length) {
-            html += `<div class="card-modern p-12 text-center"><i class="fas fa-inbox text-5xl text-gray-300"></i><p class="mt-4">Belum ada data</p></div>`;
-          } else {
-            html += `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">`;
-            html += list
-              .map(
-                (g) => `
-            <div class="card-modern p-6">
-              <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 flex items-center justify-center text-white font-bold">
-                  ${(g.name || g.nama || "?")[0].toUpperCase()}
-                </div>
+    if (role === "siswi") {
+      html += `
+        <button onclick="openabsensiModal()" class="btn-primary px-6 py-3 rounded-lg whitespace-nowrap">
+          <i class="fas fa-plus mr-2"></i>Tambah Absensi
+        </button>
+      `;
+    }
+
+    if (role === "guru") {
+      html += `
+        <button onclick="window.location.href='./absensi-haid.html'"
+          class="px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 whitespace-nowrap">
+          <i class="fas fa-heart mr-2"></i>Absensi Haid
+        </button>
+      `;
+    }
+
+    html += `</div>`;
+
+    /* ---------- JIKA DATA KOSONG ---------- */
+    if (!list.length) {
+      html += `
+        <div class="card-modern p-12 text-center">
+          <i class="fas fa-inbox text-5xl text-gray-300"></i>
+          <p class="mt-4 text-gray-600">Belum ada data absensi</p>
+        </div>
+      `;
+    } else {
+      html += `<div class="space-y-3">`;
+
+      /* ---------- AGREGASI GURU ---------- */
+      if (role === "guru" && list[0].days !== undefined) {
+        const analyzeDaysLocal = (dayArr) => {
+          const days = Array.from(new Set((dayArr || []).map(Number))).sort((a, b) => a - b);
+          if (!days.length) return { honest: false, suspect: false, total: 0, maxSeq: 0 };
+
+          let maxSeq = 1, cur = 1;
+          for (let i = 1; i < days.length; i++) {
+            if (days[i] === days[i - 1] + 1) {
+              cur++;
+              if (cur > maxSeq) maxSeq = cur;
+            } else cur = 1;
+          }
+
+          const hasSmallGap = days.some((d, idx) => idx > 0 && d - days[idx - 1] - 1 >= 1 && d - days[idx - 1] - 1 <= 2);
+
+          return {
+            honest: maxSeq >= 4,
+            suspect: hasSmallGap && days.length >= 2,
+            total: days.length,
+            maxSeq
+          };
+        };
+
+        html += list.map((i) => {
+          const name = i.name || i.nama || "-";
+          const kelas = i.classId || i.kelas || "-";
+          const days = i.days || [];
+
+          const an = analyzeDaysLocal(days);
+
+          const statusLabel = an.honest
+            ? "JUJUR"
+            : an.suspect
+            ? "DIDUGA BOLOS"
+            : "TERCATAT";
+
+          const badgeClass = an.honest
+            ? "border-green-500"
+            : an.suspect
+            ? "border-red-500"
+            : "border-yellow-500";
+
+          return `
+            <div class="card-modern p-5 border-l-4 ${badgeClass}">
+              <div class="flex justify-between items-start mb-3">
                 <div>
-                  <h4 class="font-bold">${g.name || g.nama || "-"}</h4>
-                  <p class="text-xs">${g.email || "-"}</p>
+                  <h4 class="font-bold text-lg">${name}</h4>
+                  <p class="text-xs text-gray-600 mt-1">📚 ${kelas}</p>
                 </div>
+                <span class="badge-status">${statusLabel}</span>
               </div>
-              <p><strong>Kelas:</strong> ${g.kelas || "-"}</p>
+              <p class="mt-2"><i class="fas fa-calendar mr-2 text-pink-400"></i>Hari: ${days.join(", ") || "-"}</p>
+              <p class="mt-1"><i class="fas fa-file-alt mr-2 text-purple-400"></i>Total X: ${an.total}</p>
             </div>
-          `
-              )
-              .join("");
-            html += `</div>`;
-          }
-
-          html += `</div>`;
-          container.innerHTML = html;
-        } catch (err) {
-          console.error("Guru list error:", err);
-          container.innerHTML = `<div class="card-modern p-8 text-center">
-            <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
-            <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
-            <p class="text-gray-600 mt-2">${err.message}</p>
-          </div>`;
-        }
+          `;
+        }).join("");
       }
 
-      /* ==================== PROFIL ==================== */
-      async function showProfile() {
-        const container = document.getElementById("content");
-        container.innerHTML = `<div class="text-center py-12"><i class="fas fa-spinner animate-spin text-4xl"></i></div>`;
-
-        try {
-          const res = await getProfile();
-          const user =
-            res.user ||
-            res.data ||
-            JSON.parse(localStorage.getItem("user") || "{}");
-
-          const badgeRole =
-            user.role === "guru" ? "👨‍🏫 Guru Pembina" : "👩‍🎓 Siswi";
-
-          container.innerHTML = `
-        <div class="space-y-6">
-          <div>
-            <h2 class="text-3xl font-bold">👤 Profil Saya</h2>
-            <p>Informasi akun Anda</p>
-          </div>
-
-          <div class="card-modern p-8">
-            <div class="flex items-center gap-6 mb-8 pb-8 border-b">
-              <div class="w-20 h-20 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 flex items-center justify-center text-white text-3xl font-bold">
-                ${(user.name || "?")[0].toUpperCase()}
-              </div>
+      /* ---------- SISWI ATAU DATA BIASA ---------- */
+      else {
+        html += list.map((i) => `
+          <div class="card-modern p-5 border-l-4 ${
+            i.status === "approved" ? "border-green-500"
+              : i.status === "rejected" ? "border-red-500"
+              : "border-yellow-500"
+          }">
+            <div class="flex justify-between items-start mb-3">
               <div>
-                <h3 class="text-2xl font-bold">${user.name || "-"}</h3>
-                <p class="text-sm text-gray-600 mt-1">${badgeRole}</p>
+                <h4 class="font-bold text-lg">${i.nama || i.siswi?.name || "-"}</h4>
+                <p class="text-xs text-gray-600 mt-1">📚 ${i.kelas || i.siswi?.kelas || "-"}</p>
               </div>
+              <span class="badge-status badge-${i.status}">
+                ${i.status.toUpperCase()}
+              </span>
             </div>
 
-            <div class="space-y-4">
-              <div class="flex justify-between items-center py-3 border-b">
-                <span class="font-semibold">Email</span>
-                <span class="text-gray-600">${user.email || "-"}</span>
-              </div>
-              <div class="flex justify-between items-center py-3 border-b">
-                <span class="font-semibold">Role</span>
-                <span class="text-gray-600">${user.role || "-"}</span>
-              </div>
-              <div class="flex justify-between items-center py-3">
-                <span class="font-semibold">Kelas</span>
-                <span class="text-gray-600">${user.kelas || "-"}</span>
-              </div>
-            </div>
+            <p class="mt-2"><i class="fas fa-calendar mr-2 text-pink-400"></i>
+              ${formatDate(i.tanggalMulai)}
+              ${i.tanggalSelesai ? " s/d " + formatDate(i.tanggalSelesai) : ""}
+            </p>
+            <p class="mt-1"><i class="fas fa-file-alt mr-2 text-purple-400"></i>${i.alasan || "-"}</p>
           </div>
-        </div>`;
-        } catch (err) {
-          console.error("Profile error:", err);
-          container.innerHTML = `<div class="card-modern p-8 text-center">
-            <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
-            <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
-            <p class="text-gray-600 mt-2">${err.message}</p>
-          </div>`;
-        }
+        `).join("");
       }
+
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = `
+      <div class="card-modern p-8 text-center">
+        <i class="fas fa-exclamation-circle text-5xl text-yellow-400 mb-4"></i>
+        <h3 class="text-2xl font-bold">Data Tidak Tersedia</h3>
+        <p class="text-gray-600 mt-2">${err.message}</p>
+      </div>
+    `;
+  }
+}
+
 
       /* ==================== REPORT FUNCTIONS ==================== */
       window.loadDailyReport = async () => {
